@@ -1,0 +1,24 @@
+name: Deploy UAT
+on:
+  push:
+    branches: ["release/*"]
+  workflow_dispatch:
+jobs:
+  deploy-uat:
+    runs-on: ubuntu-latest
+    environment: uat
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npx now-sdk build --frozenKeys
+      - name: Install on UAT
+        env:
+          SN_SDK_NODE_ENV: SN_SDK_CI_INSTALL
+          SN_SDK_INSTANCE_URL: ${{ secrets.SN_UAT_URL }}
+          SN_SDK_USER: ${{ secrets.SN_UAT_USER }}
+          SN_SDK_USER_PWD: ${{ secrets.SN_UAT_PASSWORD }}
+        run: npx now-sdk install

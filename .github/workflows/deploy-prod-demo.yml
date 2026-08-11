@@ -1,0 +1,27 @@
+name: Deploy Prod Demo
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+jobs:
+  deploy-prod-demo:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npx now-sdk build --frozenKeys
+      - name: Show version
+        run: node -p "require('./package.json').version"
+      - name: "PDI DEMO ONLY — install to PDI #2 (customer uses cicd install)"
+        env:
+          SN_SDK_NODE_ENV: SN_SDK_CI_INSTALL
+          SN_SDK_INSTANCE_URL: ${{ secrets.SN_PROD_URL }}
+          SN_SDK_USER: ${{ secrets.SN_PROD_USER }}
+          SN_SDK_USER_PWD: ${{ secrets.SN_PROD_PASSWORD }}
+        run: npx now-sdk install

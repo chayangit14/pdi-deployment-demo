@@ -1,0 +1,23 @@
+name: Deploy Dev
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npx now-sdk build --frozenKeys
+      - name: Install on Dev
+        env:
+          SN_SDK_NODE_ENV: SN_SDK_CI_INSTALL
+          SN_SDK_INSTANCE_URL: ${{ secrets.SN_DEV_URL }}
+          SN_SDK_USER: ${{ secrets.SN_DEV_USER }}
+          SN_SDK_USER_PWD: ${{ secrets.SN_DEV_PASSWORD }}
+        run: npx now-sdk install
