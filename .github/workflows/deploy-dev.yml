@@ -1,13 +1,23 @@
+# DEV deploy — only after a PR is merged into main.
+# A raw `git push` to main does NOT trigger this (that used to skip review).
+# Still protect `main` in GitHub: require a PR + this "PR Check" status.
 name: Deploy Dev
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches: [main]
 jobs:
   deploy-dev:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     environment: development
+    concurrency:
+      group: deploy-dev
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: "20"

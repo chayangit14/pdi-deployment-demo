@@ -1,3 +1,7 @@
+# Quality gate only — never deploys.
+# Runs when you OPEN/UPDATE a PR whose target (base) is main or release/*.
+# Combine this with branch protection: "Require status checks to pass before merging"
+# so a failing build cannot be merged.
 name: PR Check
 on:
   pull_request:

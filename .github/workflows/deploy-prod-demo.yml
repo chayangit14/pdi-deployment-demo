@@ -1,3 +1,6 @@
+# Prod-demo deploy — never on a branch push.
+# Trigger: git tag vX.Y.Z (e.g. v1.0.0) or Actions → Run workflow.
+# Add Required reviewers on the GitHub Environment named "production".
 name: Deploy Prod Demo
 on:
   push:
@@ -8,6 +11,9 @@ jobs:
   deploy-prod-demo:
     runs-on: ubuntu-latest
     environment: production
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

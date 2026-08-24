@@ -1,14 +1,26 @@
+# UAT deploy
+# 1) Automatic: only when a PR is merged into a release/* branch (not a direct push).
+# 2) Manual: Actions → Deploy UAT → Run workflow (pick the release/* branch).
+# Add Required reviewers on the GitHub Environment named "uat" so the job waits
+# for approval before secrets are used and the install runs.
 name: Deploy UAT
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches: ["release/*"]
   workflow_dispatch:
 jobs:
   deploy-uat:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     environment: uat
+    concurrency:
+      group: deploy-uat
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha || github.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
